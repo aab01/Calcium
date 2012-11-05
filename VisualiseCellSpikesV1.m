@@ -9,38 +9,85 @@ function VisualiseCellSpikesV1(Cells)
 % Set up time axis for movies/rendering
 fps = 1/5;
 timeaxis = [0:1:143]/fps;
+nCells = 50;
 
 % Get Centroids for ease of processing
  Cr = cat(1,Cells(:).Centroid1);
  Cc = cat(1,Cells(:).Centroid2);
  
- figure(1); % Place the slide cartoon into Figure 1
+ hf=figure(1); % Place the slide cartoon into Figure 1
  plot(Cr,Cc,'o','MarkerFaceColor','b');
  axis ij; % Mode compat with images
  axis off;
  hold on
+ hw = waitbar(0,'Rendering...');
+ set(hw,'Color',[1 1 1]); % Black BG
+ p = get(hw,'Children');
+ hwc=get(p,'Children');
+ set(hwc(2),'FaceColor',[1 1 0]);
+ set(hwc(2),'EdgeColor',[1 1 0]);
+ set(hwc(1),'Color',[1 1 1]);
+
  for n = 1:length(Cr) % number of cells
-     h(n)=render_cells(Cr(n),Cc(n),0,1,1,1,10,[0.8 0.2 0.2]);
-     text(Cr(n)-5,Cc(n)+10,20,num2str(n));
+     hc(n)=render_cells(Cr(n),Cc(n),0,1,1,1,10,[0.8 0.2 0.2]);
+     ht=text(Cr(n)-5,Cc(n)+10,20,num2str(n));
+     set(ht,'Color','w');
+     waitbar(n/length(Cr),hw)
  end
+ delete(hw);
  lighting phong;
+ set(hf,'Color',[0,0,0]);
  hold off;
  
-for c = 1:50
-    t = SpikeResultsDur(c).locs+1; % t: Array
+MatrixOfPeaksDuring = zeros(nCells,length(timeaxis)); 
+for c = 1:nCells
+    t = Cells(c).SpikesDuring.time+1; % t: Array
     MatrixOfPeaksDuring(c,t) = 1; 
 end
 
+MatrixOfPeaksAfter = zeros(nCells,length(timeaxis)); 
+for c = 1:nCells
+    t = Cells(c).SpikesAfter.time+1; % t: Array
+    MatrixOfPeaksAfter(c,t) = 1; 
+end
+
+pause;
 disp('Press any key to start spike rendering');
-for t = 1:100
-    for c = 1:50
+light;
+
+for t = 1:length(timeaxis)
+    for c = 1:nCells
         if MatrixOfPeaksDuring(c,t)==1
-            set(h(c),'FaceColor',[0.8 0.8 0.2]);
+            set(hc(c),'FaceColor',[0.8 0.8 0.2]);
         else
-            set(h(c),'FaceColor',[0.8 0.2 0.2]);
+            set(hc(c),'FaceColor',[0.8 0.2 0.2]);
         end
     end
-    pause(0.5);
+    SecondString = num2str(timeaxis(t),'%2.1f');
+    TimeString = ['t = ',SecondString,'s'];
+    htimestamp=text(10,510,[TimeString]);
+    set(htimestamp,'Color','w');
+    pause(0.25);
+    delete(htimestamp);
+end
+
+pause;
+disp('Press space bar to start spike rendering: After');
+
+for t = 1:length(timeaxis)
+    for c = 1:nCells
+        if MatrixOfPeaksAfter(c,t)==1
+            set(hc(c),'FaceColor',[0.8 0.8 0.2]);
+        else
+            set(hc(c),'FaceColor',[0.8 0.2 0.2]);
+        end
+    end
+    SecondString = num2str(timeaxis(t),'%2.1f');
+    TimeString = ['t = ',SecondString,'s'];
+    htimestamp=text(10,510,[TimeString]);
+    set(htimestamp,'Color','w');
+    pause(0.25);
+    delete(htimestamp);
 end
  
 
