@@ -66,7 +66,7 @@ for t = 1:length(timeaxis)
     end
     SecondString = num2str(timeaxis(t),'%2.1f');
     TimeString = ['t = ',SecondString,'s'];
-    htimestamp=text(10,20,[TimeString]);
+    htimestamp=text(10,500,[TimeString]);
     set(htimestamp,'Color','w');
     F = getframe;
     aviobj = addframe(aviobj,F);
