@@ -3,7 +3,7 @@ function VisualiseCellSpikesV1(Cells)
 %
 % 
 % Example:
-%   load Ca2SignalsUdatedAfterViva.mat;
+%   load CellsStructure;
 %   VisualiseCellSpikesV1(Cells);
 
 % Set up time axis for movies/rendering
@@ -55,6 +55,7 @@ pause;
 disp('Press any key to start spike rendering');
 light;
 
+aviobj = avifile('During.avi','FPS',5)
 for t = 1:length(timeaxis)
     for c = 1:nCells
         if MatrixOfPeaksDuring(c,t)==1
@@ -65,12 +66,15 @@ for t = 1:length(timeaxis)
     end
     SecondString = num2str(timeaxis(t),'%2.1f');
     TimeString = ['t = ',SecondString,'s'];
-    htimestamp=text(10,510,[TimeString]);
+    htimestamp=text(10,20,[TimeString]);
     set(htimestamp,'Color','w');
+    F = getframe;
+    aviobj = addframe(aviobj,F);
     pause(0.25);
     delete(htimestamp);
 end
 
+aviobj = close(aviobj);
 pause;
 disp('Press space bar to start spike rendering: After');
 
